@@ -21,6 +21,6 @@ An easy way to work with the yetiborg is to install [Cyberduck](https://cyberduc
 ## TODO
 - [x] Export 2023_start_here zip to git
 - [x] Find an easy way to launch scripts on the yetiborg
-- [ ] Configure python3 on the yetiborg
+- [x] Configure python3 on the yetiborg
 - [ ] Create .mp4 file so we can offline work on it
 - [ ] Design arm mount
