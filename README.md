@@ -18,6 +18,9 @@ __Linux__:
 ### Working on The yetiborg
 An easy way to work with the yetiborg is to install [Cyberduck](https://cyberduck.io/). In this way you are able to use vscode on the yetiborg.
 
+### Use python3
+alias python=python3
+
 ## TODO
 - [x] Export 2023_start_here zip to git
 - [x] Find an easy way to launch scripts on the yetiborg
