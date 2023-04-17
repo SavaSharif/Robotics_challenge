@@ -1,7 +1,12 @@
 import ZeroBorg3 as ZeroBorg
 import sys, time
-import tty, termios, fcntl, os, atexit
+import tty, termios, os, atexit
 import numpy as np
+
+"""
+Boilerplate code for user inputs without blocking, without multithreading and usable for all OS
+Please make no changes in the following section
+"""
 
 old_settings=None
 
@@ -31,23 +36,15 @@ def any_key():
    return ch_set
 
 
-class _Getch:
-    def __call__(self):
-        fd = sys.stdin.fileno()
-        old_settings = termios.tcgetattr(fd)
-        old_flags = fcntl.fcntl(fd, fcntl.F_GETFL)
-        try:
-            tty.setraw(sys.stdin.fileno())
-            fcntl.fcntl(fd, fcntl.F_SETFL, old_flags | os.O_NONBLOCK)
-            ch = sys.stdin.read(1)
-        finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-        return ch
+"""
+You can make changes in the section below
+"""
 
 class ZBController:
+    """
+    ZeroBorg controller
+    """
     def __init__(self):
-        self.time_start = time.time()
-
         # Setup the ZeroBorg
         self.ZB = ZeroBorg.ZeroBorg()
         #ZB.i2cAddress = 0x44                   # Uncomment and change the value if you have changed the board address
@@ -68,6 +65,9 @@ class ZBController:
         self.ZB.ResetEpo()
 
 
+        """
+        TODO: movement settings are not used yet, should be implemented
+        """
         # Movement settings (worked out from our YetiBorg v2 on a smooth surface)
         self.timeForward1m = 5.7                     # Number of seconds needed to move about 1 meter
         self.timeSpin360   = 4.8                     # Number of seconds needed to make a full left / right spin
@@ -83,80 +83,97 @@ class ZBController:
         else:
             self.maxPower = self.voltageOut / float(self.voltageIn)
 
+        # Set the robot in the running state
         self.running = True
-        self.active_commands = { # directionm number of seconds
+
+        # Keeps track of how long a command should be executed
+        self.active_commands = { # format is "direction" : time.time() seconds (at which the command should stop)
             "forward" : 0.0,
             "left" : 0.0,
             "right" : 0.0,
             "backward" : 0.0
         }
 
-        self.command2servo = {
+        # Translate commands to servo outputs
+        self.command2servo = { # rear right, front right, front left, rear left
             "forward" : np.array([1.0, 1.0, 1.0, 1.0]),
             "left" : np.array([1.0, 1.0, -1.0, -1.0]),
             "right": np.array([-1.0, -1.0, 1.0, 1.0]),
             "backward" : np.array([-1.0, -1.0, -1.0, -1.0])
         }
 
-        self.command2break = {
+        # Braking values for servos
+        self.command2brake = {
             "forward" : np.array([-1.0, -1.0, -1.0, -1.0]),
             "left" : np.array([-0.5, -0.5, 0.5, 0.5]),
             "right": np.array([0.5, 0.5, -0.5, -.5]),
             "backward" : np.array([0.5, 0.5, 0.5, 0.5])
         }
 
-        self.servos = [0.0, 0.0, 0.0, 0.0] # rr, fr, fl , rl
+        # Intialize servo and brake values
+        self.servos = [0.0, 0.0, 0.0, 0.0] 
         self.brakes = [0.0, 0.0, 0.0, 0.0]
-        
+
+        self.time_start = time.time()
         self.current_time = time.time()
 
 
     def main(self):
-        planned_commands = ["w", "d", "wd", "w", "d"]
-        planned_command_times = [0, 2, 4, 6, 6.5]
-
         # Main loop
         while self.running:
-            self.get_input()
-            self.update_active_commands()
-            self.update_servos()
+            self.get_input() # Check for user input
+            self.update_active_commands() # Execute user inputs and stop commands that are overdue
+            self.update_servos() # Send the commands to the servos
+
+            # Prevent the system from overloading during the loop
             time.sleep(0.05)
 
     def update_active_commands(self):
         self.current_time = time.time()
+        # Reset servo and brake values
         self.servos = np.array([0.0, 0.0, 0.0, 0.0])
         self.brakes = np.array([0.0, 0.0, 0.0, 0.0])
+
+        # Check for all inputs (forward, left, right, backward)
         for comm in self.active_commands.keys():
             if self.current_time < self.active_commands[comm]:
+                # Command should still be executed
                 self.servos += self.command2servo[comm]
             
             elif self.active_commands[comm] != 0.0:
-                self.brakes += self.command2break[comm]
+                # Command should stop, perform a brake
+                self.brakes += self.command2brake[comm]
                 self.active_commands[comm] = 0.0
 
+        # Combine brakes + servos for the output
         self.servos += self.brakes
+        
+        # Calculate max value for normalization and normalize servo values such that the lie between 1 and -1
         max_val = max((max(abs(self.servos)), 1.0))
         self.servos = self.servos / max_val
 
         
     def update_servos(self):
-        # print("servos", self.servos)
         if max(self.servos) == 0.0 and max(self.servos):
+            # Turn the motors off
             self.ZB.MotorsOff()
         
         else:
+            # Send values to servos
             self.ZB.SetMotor1(-self.servos[0] * self.maxPower)
             self.ZB.SetMotor2(-self.servos[1] * self.maxPower)
             self.ZB.SetMotor3(-self.servos[2] * self.maxPower)
             self.ZB.SetMotor4(-self.servos[3] * self.maxPower)
 
     def get_input(self):
+        # Detect user input
         key = any_key()
         if key != []:
             key = key[0].decode("utf-8")
             if "q" in key:
                 self.running = False
             else:
+                # Big movements
                 if "w" in key:
                     self.active_commands["forward"] = self.current_time + 1
                 elif "a" in key:
@@ -166,6 +183,8 @@ class ZBController:
                 elif "d" in key:
                     self.active_commands["right"] = self.current_time + 1
                 elif "i" in key:
+
+                # Small movements
                     self.active_commands["forward"] = self.current_time + 0.01
                 elif "j" in key:
                     self.active_commands["left"] = self.current_time + 0.01
@@ -174,6 +193,7 @@ class ZBController:
                 elif "l" in key:
                     self.active_commands["right"] = self.current_time + 0.01
 
+# Initialize the loop
 init_any_key()
 ZBC = ZBController()
 ZBC.main()

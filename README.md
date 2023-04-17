@@ -10,7 +10,7 @@ __MacOs__:
 > nmap -v -sn 192.168.1.0/24
 
 __Windows__:
-> Marc?
+> arp -a
 
 __Linux__:
 > {unkown}
