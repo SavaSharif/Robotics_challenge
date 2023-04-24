@@ -69,7 +69,8 @@ class ZBController:
         TODO: movement settings are not used yet, should be implemented
         """
         # Movement settings (worked out from our YetiBorg v2 on a smooth surface)
-        self.timeForward1m = 5.7                     # Number of seconds needed to move about 1 meter
+        self.timeForward1m = 5.7                     # Number of seconds to move 1 meter forwards
+        self.timeBackward1m = 4.                     # Number of seconds to move 1 meter backwards 
         self.timeSpin360   = 4.8                     # Number of seconds needed to make a full left / right spin
         self.testMode = False                        # True to run the motion tests, False to run the normal sequence
 
@@ -175,23 +176,40 @@ class ZBController:
             else:
                 # Big movements
                 if "w" in key:
-                    self.active_commands["forward"] = self.current_time + 1
+                    self.move("forward", 1)
                 elif "a" in key:
-                    self.active_commands["left"] = self.current_time + 1
+                    self.move("left", 360)
                 elif "s" in key:
-                    self.active_commands["backward"] = self.current_time + 1
+                    self.move("backward", 1)
                 elif "d" in key:
-                    self.active_commands["right"] = self.current_time + 1
-                elif "i" in key:
+                    self.move("right", 360)
 
                 # Small movements
-                    self.active_commands["forward"] = self.current_time + 0.01
+                elif "i" in key:
+                    self.move("forward", 0.01)
                 elif "j" in key:
-                    self.active_commands["left"] = self.current_time + 0.01
+                    self.move("left", 1)
                 elif "k" in key:
-                    self.active_commands["backward"] = self.current_time + 0.01
+                    self.move("backward", 0.01)
                 elif "l" in key:
-                    self.active_commands["right"] = self.current_time + 0.01
+                    self.move("right", 1)
+
+    def move(self, direction='forward', distdeg=0):
+        if direction == "forward":
+            self.active_commands["forward"] = self.current_time + distdeg * self.timeForward1m
+
+        elif direction == "backward":
+            self.active_commands["backward"] = self.current_time + distdeg * self.timeBackward1m
+
+        elif direction == "left":
+            self.active_commands["left"] = self.current_time + distdeg * self.timeSpin360 / 360
+
+        elif direction == "right":
+            self.active_commands["right"] = self.current_time + distdeg * self.timeSpin360 / 360
+
+        else:
+            print("Please specify a proper direction")
+
 
 # Initialize the loop
 init_any_key()
