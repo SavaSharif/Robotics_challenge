@@ -4,8 +4,8 @@
 # Creates a web-page interface for YetiBorg v2
 
 # Import library functions we need
-import ZeroBorg
-# import ZeroBorg3 as ZeroBorg
+# import ZeroBorg
+import ZeroBorg3 as ZeroBorg
 import time
 import sys
 import threading
