@@ -69,9 +69,9 @@ class ZBController:
         TODO: movement settings are not used yet, should be implemented
         """
         # Movement settings (worked out from our YetiBorg v2 on a smooth surface)
-        self.timeForward1m = 5.7                     # Number of seconds to move 1 meter forwards
-        self.timeBackward1m = 4.                     # Number of seconds to move 1 meter backwards 
-        self.timeSpin360   = 4.8                     # Number of seconds needed to make a full left / right spin
+        self.timeForward1m = 2.647                    # Number of seconds to move 1 meter forwards
+        self.timeBackward1m = 4.64                     # Number of seconds to move 1 meter backwards 
+        self.timeSpin360   = 2.341                     # Number of seconds needed to make a full left / right spin
         self.testMode = False                        # True to run the motion tests, False to run the normal sequence
 
         # Power settings
