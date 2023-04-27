@@ -150,5 +150,9 @@ class ZBController:
                 elif "l" in key:
                     self.active_commands["right"] = self.current_time + 0.01
 
-ZBC = ZBController()
-ZBC.main()
+
+if __name__ == '__main__':
+	# Run controller function
+	ZBC = ZBController()
+	ZBC.main()
+	print("Done")
