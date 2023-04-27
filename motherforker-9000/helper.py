@@ -1,6 +1,6 @@
 import os
 import cv2
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 import numpy as np
 
 def getObjectFeet():
@@ -36,12 +36,31 @@ def cannyEdgeDet(img):
 	"""
 	return cv2.Canny(img,200,500)
 
-def showImage(img, cmap='viridis'):
+def determineDistance(img, verbose=False):
 	"""
-	Show the given image, Only use on own OS not ZB!
-	:param img: An array with rgb image data
-	:param cmap: The color map to display the image in
+	Give the distance of an edge detection algorithms lowest pixels
+	:param img:
+	:return:
 	"""
-	plt.subplot(1, 1, 1)
-	plt.imshow(img, cmap=cmap)
-	plt.show()
+	y = max(np.where(img == 255)[0])
+	if verbose:
+		print("lowest edge pixel:", y)
+	# 92 = 110 cm
+	if y < 92:
+		return 110
+	# 96 = 90 cm
+	elif y > 96:
+		return 90
+	else:
+		d = 90 + 20 * (96 - y) / 4
+		return int(d)
+
+# def showImage(img, cmap='viridis'):
+# 	"""
+# 	Show the given image, Only use on own OS not ZB!
+# 	:param img: An array with rgb image data
+# 	:param cmap: The color map to display the image in
+# 	"""
+# 	plt.subplot(1, 1, 1)
+# 	plt.imshow(img, cmap=cmap)
+# 	plt.show()
