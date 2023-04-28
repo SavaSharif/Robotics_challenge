@@ -8,24 +8,23 @@ import time
 
 class Camera:
     def __init__(self):
-        self.width = 640/2
-        self.height = 480/2
+        self.cam_width = 640
+        self.cam_height = 480
+        self.resize_resolution = (320, 240)
         self.frameRate = 32
         self.camera = PiCamera()
         self.camera.awb_mode = 'auto'
-        self.camera.resolution = (int(self.width), int(self.height))
+        self.camera.resolution = (int(self.cam_width), int(self.cam_height))
         self.camera.framerate = self.frameRate
-        self.rawCapture = PiRGBArray(self.camera, size=(int(self.width), int(self.height)))
+        # self.rawCapture = PiRGBArray(self.camera, size=(int(self.width), int(self.height))) #NOT USED?
 
     def intialize_focal_length(self, observed_width: float, known_width: float, distance: float):
             # Calculate the focal length of the camera.
             self.focal_length = (observed_width * distance) / known_width
 
-    def take_picture(self) -> str:
+    def take_picture(self, filename = time.strftime("%Y-%m-%d_%H-%M-%S") + '.jpg') -> str:
             # Take a picture and save it to the current directory with the date and time as the filename
-            date = time.strftime("%Y-%m-%d_%H-%M-%S")
-            filename = date + '.jpg'
-            self.camera.capture(filename)
+            self.camera.capture(filename, resize=self.resize_resolution)
             return filename
 
     def get_focal_length(self) -> float:
