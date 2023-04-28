@@ -36,18 +36,6 @@ class ZBController:
     def __init__(self):
         self.time_start = time.time()
 
-        # Camera settings
-        self.cam_width = 640 / 2
-        self.cam_height = 480 / 2
-        self.resize_resolution = (320, 240)
-
-        # Setup the camera
-        self.camera = PiCamera()
-        self.camera.awb_mode = 'auto'
-        self.camera.resolution = (int(self.cam_width), int(self.cam_height))
-        self.camera.framerate = 32
-        self.rawCapture = PiRGBArray(self.camera, size=(int(self.cam_width), int(self.cam_height)))
-
         # Setup the ZeroBorg
         self.ZB = ZeroBorg.ZeroBorg()
         #ZB.i2cAddress = 0x44                   # Uncomment and change the value if you have changed the board address
