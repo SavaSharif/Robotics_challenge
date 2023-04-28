@@ -83,6 +83,5 @@ class ImageProcessor:
 
         return cx, cy
 
-    class Helper:
-        def get_distance(known_object_width: float, focal_length: float, observed_width: float) -> float:
-            return (known_object_width * focal_length) / observed_width
+def get_distance(known_object_width: float, focal_length: float, observed_width: float) -> float:
+    return (known_object_width * focal_length) / observed_width

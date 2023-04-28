@@ -5,7 +5,6 @@ from helper import Camera, ImageProcessor
 
 def main():
     # Challenge 1: Detect an object in front of the robot, drive towards it, and stop when it touches it.
-
     known_object_width = 7 # The width of the object in centimeters.
     known_object_width_measured_distance = 110 # The distance at which the object was measured.
     observed_width = 15 # The width of the object in pixels.
