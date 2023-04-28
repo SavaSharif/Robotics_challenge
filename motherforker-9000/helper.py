@@ -17,20 +17,20 @@ class Camera:
         self.camera.framerate = self.frameRate
         self.rawCapture = PiRGBArray(self.camera, size=(int(self.width), int(self.height)))
 
-def intialize_focal_length(self, observed_width: float, known_width: float, distance: float):
-        # Calculate the focal length of the camera.
-        self.focal_length = (observed_width * distance) / known_width
+    def intialize_focal_length(self, observed_width: float, known_width: float, distance: float):
+            # Calculate the focal length of the camera.
+            self.focal_length = (observed_width * distance) / known_width
 
-def take_picture(self) -> str:
-        # Take a picture and save it to the current directory with the date and time as the filename
-        date = time.strftime("%Y-%m-%d_%H-%M-%S")
-        filename = date + '.jpg'
-        self.camera.capture(filename)
-        return filename
+    def take_picture(self) -> str:
+            # Take a picture and save it to the current directory with the date and time as the filename
+            date = time.strftime("%Y-%m-%d_%H-%M-%S")
+            filename = date + '.jpg'
+            self.camera.capture(filename)
+            return filename
 
-def get_focal_length(self) -> float:
-        # Return the focal length of the camera.
-        return self.focal_length
+    def get_focal_length(self) -> float:
+            # Return the focal length of the camera.
+            return self.focal_length
 
 class ImageProcessor:
     def __init__(self, filename: str):
