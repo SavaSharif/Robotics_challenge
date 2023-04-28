@@ -1,4 +1,6 @@
 import ZeroBorg3 as ZeroBorg
+from picamera.array import PiRGBArray
+from picamera import PiCamera
 import sys, time
 import tty, termios, fcntl, os
 import numpy as np
@@ -19,6 +21,18 @@ class _Getch:
 class ZBController:
     def __init__(self):
         self.time_start = time.time()
+
+        # Camera settings
+        self.cam_width = 640 / 2
+        self.cam_height = 480 / 2
+        self.resize_resolution = (320, 240)
+
+        # Setup the camera
+        self.camera = PiCamera()
+        self.camera.awb_mode = 'auto'
+        self.camera.resolution = (int(self.cam_width), int(self.cam_height))
+        self.camera.framerate = 32
+        self.rawCapture = PiRGBArray(self.camera, size=(int(self.cam_width), int(self.cam_height)))
 
         # Setup the ZeroBorg
         self.ZB = ZeroBorg.ZeroBorg()
@@ -126,6 +140,9 @@ class ZBController:
             self.ZB.SetMotor3(-self.servos[2] * self.maxPower)
             self.ZB.SetMotor4(-self.servos[3] * self.maxPower)
 
+    def take_curr_frame(self):
+        return self.camera.capture(self.rawCapture, format='rgb', resize=self.resize_resolution)
+
     def get_input(self):
         inkey = _Getch()
         key = inkey()
@@ -150,5 +167,9 @@ class ZBController:
                 elif "l" in key:
                     self.active_commands["right"] = self.current_time + 0.01
 
-ZBC = ZBController()
-ZBC.main()
+
+if __name__ == '__main__':
+	# Run controller function
+	ZBC = ZBController()
+	ZBC.main()
+	print("Done")
