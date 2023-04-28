@@ -68,8 +68,9 @@ class ZBController:
 
 
         # Movement settings (worked out from our YetiBorg v2 on a smooth surface)
-        self.timeForward1m = 5.7                     # Number of seconds needed to move about 1 meter
-        self.timeSpin360   = 4.8                     # Number of seconds needed to make a full left / right spin
+        self.timeForward1m = 2.647                   # Number of seconds to move 1 meter forwards
+        self.timeBackward1m = 4.64                   # Number of seconds to move 1 meter backwards 
+        self.timeSpin360   = 2.341                   # Number of seconds needed to make a full left / right spin
         self.testMode = False                        # True to run the motion tests, False to run the normal sequence
 
         # Power settings
@@ -82,76 +83,115 @@ class ZBController:
         else:
             self.maxPower = self.voltageOut / float(self.voltageIn)
 
+        # Set the robot in the running state
         self.running = True
-        self.active_commands = { # directionm number of seconds
+
+        # Keeps track of how long a command should be executed
+        self.active_commands = { # format is "direction" : time.time() seconds (at which the command should stop)
             "forward" : 0.0,
             "left" : 0.0,
             "right" : 0.0,
             "backward" : 0.0
         }
 
-        self.command2servo = {
+        # Translate commands to servo outputs
+        self.command2servo = { # rear right, front right, front left, rear left
             "forward" : np.array([1.0, 1.0, 1.0, 1.0]),
             "left" : np.array([1.0, 1.0, -1.0, -1.0]),
             "right": np.array([-1.0, -1.0, 1.0, 1.0]),
             "backward" : np.array([-1.0, -1.0, -1.0, -1.0])
         }
 
-        self.servos = [0.0, 0.0, 0.0, 0.0] # rr, fr, fl , rl
+        # Braking values for servos
+        self.command2brake = {
+            "forward" : np.array([-1.0, -1.0, -1.0, -1.0]),
+            "left" : np.array([-0.5, -0.5, 0.5, 0.5]),
+            "right": np.array([0.5, 0.5, -0.5, -.5]),
+            "backward" : np.array([0.5, 0.5, 0.5, 0.5])
+        }
+
+        # Intialize servo and brake values
+        self.servos = [0.0, 0.0, 0.0, 0.0] 
         self.brakes = [0.0, 0.0, 0.0, 0.0]
-        
+
+        self.time_start = time.time()
         self.current_time = time.time()
 
 
     def main(self):
-        planned_commands = ["w", "d", "wd", "w", "d"]
-        planned_command_times = [0, 2, 4, 6, 6.5]
-
         # Main loop
         while self.running:
-            self.get_input()
-            # if len(planned_command_times) > 0:
-                # if time.time() - self.time_start > planned_command_times[0]:
-                #     self.get_input(planned_commands[0])
-                #     print("Starting comm", planned_commands[0])
+            self.get_input() # Check for user input
+            self.update_active_commands() # Execute user inputs and stop commands that are overdue
+            self.update_servos() # Send the commands to the servos
 
-                #     planned_commands.pop(0)
-                #     planned_command_times.pop(0)
-
-            self.update_active_commands()
-            self.update_servos()
-            time.sleep(0.1)
-
+            # Prevent the system from overloading during the loop
+            time.sleep(0.05)
 
     def update_active_commands(self):
         self.current_time = time.time()
+        # Reset servo and brake values
         self.servos = np.array([0.0, 0.0, 0.0, 0.0])
         self.brakes = np.array([0.0, 0.0, 0.0, 0.0])
+
+        # Check for all inputs (forward, left, right, backward)
         for comm in self.active_commands.keys():
             if self.current_time < self.active_commands[comm]:
+                # Command should still be executed
                 self.servos += self.command2servo[comm]
             
             elif self.active_commands[comm] != 0.0:
-                self.brakes += -self.command2servo[comm]
-                print("Stopping comm", comm)
+                # Command should stop, perform a brake
+                self.brakes += self.command2brake[comm]
                 self.active_commands[comm] = 0.0
 
-                
+        # Combine brakes + servos for the output
         self.servos += self.brakes
+        
+        # Calculate max value for normalization and normalize servo values such that the lie between 1 and -1
         max_val = max((max(abs(self.servos)), 1.0))
         self.servos = self.servos / max_val
 
         
     def update_servos(self):
-        # print("servos", self.servos)
         if max(self.servos) == 0.0 and max(self.servos):
+            # Turn the motors off
             self.ZB.MotorsOff()
         
         else:
+            # Send values to servos
             self.ZB.SetMotor1(-self.servos[0] * self.maxPower)
             self.ZB.SetMotor2(-self.servos[1] * self.maxPower)
             self.ZB.SetMotor3(-self.servos[2] * self.maxPower)
             self.ZB.SetMotor4(-self.servos[3] * self.maxPower)
+
+    def get_input(self):
+        # Detect user input
+        key = any_key()
+        if key != []:
+            key = key[0].decode("utf-8")
+            if "q" in key:
+                self.running = False
+            else:
+                # Big movements
+                if "w" in key:
+                    self.move("forward", 1)
+                elif "a" in key:
+                    self.move("left", 360)
+                elif "s" in key:
+                    self.move("backward", 1)
+                elif "d" in key:
+                    self.move("right", 360)
+
+                # Small movements
+                elif "i" in key:
+                    self.move("forward", 0.01)
+                elif "j" in key:
+                    self.move("left", 1)
+                elif "k" in key:
+                    self.move("backward", 0.01)
+                elif "l" in key:
+                    self.move("right", 1)
 
     def take_curr_frame(self):
         return self.camera.capture(self.rawCapture, format='rgb', resize=self.resize_resolution)
