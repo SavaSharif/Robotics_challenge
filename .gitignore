@@ -1,3 +1,4 @@
 .*
 !.gitignore
 __pycache__
+pipfile.lock
