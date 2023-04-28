@@ -1,5 +1,6 @@
 import controller
 from helper import *
+import time
 
 class challenge2:
 	"""
@@ -25,10 +26,16 @@ class challenge2:
 		return determineDistance(img_edge)
 
 	def run(self):
-		# self.ZBC.active_commands["forward"] = self.ZBC.current_time + 100
-		self.ZBC.update_active_commands()
-		self.ZBC.update_servos()
 		print('We are on the way!')
+		self.ZBC.active_commands["forward"] = self.ZBC.current_time + 100
+		done = True
+		while not done:
+			self.ZBC.update_active_commands()
+			self.ZBC.update_servos()
+			time.sleep(0.1)
+
+			if _:
+				done = False
 
 if __name__ == '__main__':
 	challenge = challenge2()
