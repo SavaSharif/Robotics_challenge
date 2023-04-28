@@ -33,9 +33,9 @@ def any_key() -> str:
 
 
 class ZBController:
-    def __init__(self):
+    def __init__(self, user_control:bool=True):
         self.time_start = time.time()
-
+        self.user_control = user_control
         # Setup the ZeroBorg
         self.ZB = ZeroBorg.ZeroBorg()
         #ZB.i2cAddress = 0x44                   # Uncomment and change the value if you have changed the board address
@@ -156,61 +156,35 @@ class ZBController:
 
     def get_input(self):
         # Detect user input
-        key = any_key()
-        if key != []:
-            key = key[0].decode("utf-8")
-            if "q" in key:
-                self.running = False
-            else:
-                # Big movements
-                if "w" in key:
-                    self.move("forward", 1)
-                elif "a" in key:
-                    self.move("left", 360)
-                elif "s" in key:
-                    self.move("backward", 1)
-                elif "d" in key:
-                    self.move("right", 360)
+        if self.user_control:
+            key = any_key()
+            if key != []:
+                key = key[0].decode("utf-8")
+                if "q" in key:
+                    self.running = False
+                else:
+                    # Big movements
+                    if "w" in key:
+                        self.move("forward", 1)
+                    elif "a" in key:
+                        self.move("left", 360)
+                    elif "s" in key:
+                        self.move("backward", 1)
+                    elif "d" in key:
+                        self.move("right", 360)
 
-                # Small movements
-                elif "i" in key:
-                    self.move("forward", 0.01)
-                elif "j" in key:
-                    self.move("left", 1)
-                elif "k" in key:
-                    self.move("backward", 0.01)
-                elif "l" in key:
-                    self.move("right", 1)
+                    # Small movements
+                    elif "i" in key:
+                        self.move("forward", 0.01)
+                    elif "j" in key:
+                        self.move("left", 1)
+                    elif "k" in key:
+                        self.move("backward", 0.01)
+                    elif "l" in key:
+                        self.move("right", 1)
 
     def take_curr_frame(self):
         return self.camera.capture(self.rawCapture, format='rgb', resize=self.resize_resolution)
-
-    def get_input(self):
-        key = any_key()
-        if key != []:
-            key = key[0].decode("utf-8")
-            if "q" in key:
-                self.running = False
-            else:
-                # Big movements
-                if "w" in key:
-                    self.move("forward", 1)
-                elif "a" in key:
-                    self.move("left", 360)
-                elif "s" in key:
-                    self.move("backward", 1)
-                elif "d" in key:
-                    self.move("right", 360)
-
-                # Small movements
-                elif "i" in key:
-                    self.move("forward", 0.01)
-                elif "j" in key:
-                    self.move("left", 1)
-                elif "k" in key:
-                    self.move("backward", 0.01)
-                elif "l" in key:
-                    self.move("right", 1)
 
     def move(self, direction='forward', distdeg=0):
         if direction == "forward":
