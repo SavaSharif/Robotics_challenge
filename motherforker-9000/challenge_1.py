@@ -25,12 +25,16 @@ def main():
         observed_width = img_processor.get_object_width() # The width of the object in pixels.
         print("observed_width:", observed_width)
         
-        x,y = img_processor.get_object_center_coordinates()
+        x,y = img_processor.get_object_center_coordinates()a
         print("x,y:", x, y)
         # Calculate the distance to the object.
         distance = (known_object_width * focal_length) / observed_width
         print("distance:", distance)
-        robot.move(direction="forward",distdeg = distance)
+        robot.move(direction="forward", distdeg = distance)
+        robot.update_active_commands()
+        robot.update_servos()
+        if distance < 5:
+            reached_object = True	
 
 
 if __name__ == '__main__':
