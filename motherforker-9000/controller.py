@@ -2,21 +2,34 @@ import ZeroBorg3 as ZeroBorg
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 import sys, time
-import tty, termios, fcntl, os
+import tty, termios, fcntl, os, atexit
 import numpy as np
 
-class _Getch:
-    def __call__(self):
-        fd = sys.stdin.fileno()
-        old_settings = termios.tcgetattr(fd)
-        old_flags = fcntl.fcntl(fd, fcntl.F_GETFL)
-        try:
-            tty.setraw(sys.stdin.fileno())
-            fcntl.fcntl(fd, fcntl.F_SETFL, old_flags | os.O_NONBLOCK)
-            ch = sys.stdin.read(1)
-        finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-        return ch
+def init_any_key():
+   global old_settings
+   old_settings = termios.tcgetattr(sys.stdin)
+   new_settings = termios.tcgetattr(sys.stdin)
+   new_settings[3] = new_settings[3] & ~(termios.ECHO | termios.ICANON) # lflags
+   new_settings[6][termios.VMIN] = 0  # cc
+   new_settings[6][termios.VTIME] = 0 # cc
+   termios.tcsetattr(sys.stdin, termios.TCSADRAIN, new_settings)
+
+
+@atexit.register
+def term_any_key():
+   global old_settings
+   if old_settings:
+      termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+
+
+def any_key():
+   ch_set = []
+   ch = os.read(sys.stdin.fileno(), 1)
+   while ch is not None and len(ch) > 0:
+      ch_set.append(ch)
+      ch = os.read(sys.stdin.fileno(), 1)
+   return ch_set
+
 
 class ZBController:
     def __init__(self):
@@ -144,32 +157,55 @@ class ZBController:
         return self.camera.capture(self.rawCapture, format='rgb', resize=self.resize_resolution)
 
     def get_input(self):
-        inkey = _Getch()
-        key = inkey()
-        if key != None:
+        key = any_key()
+        if key != []:
+            key = key[0].decode("utf-8")
             if "q" in key:
                 self.running = False
             else:
+                # Big movements
                 if "w" in key:
-                    self.active_commands["forward"] = self.current_time + 100
+                    self.move("forward", 1)
                 elif "a" in key:
-                    self.active_commands["left"] = self.current_time + 100
+                    self.move("left", 360)
                 elif "s" in key:
-                    self.active_commands["backward"] = self.current_time + 100
+                    self.move("backward", 1)
                 elif "d" in key:
-                    self.active_commands["right"] = self.current_time + 100
+                    self.move("right", 360)
+
+                # Small movements
                 elif "i" in key:
-                    self.active_commands["forward"] = self.current_time + 0.01
+                    self.move("forward", 0.01)
                 elif "j" in key:
-                    self.active_commands["left"] = self.current_time + 0.01
+                    self.move("left", 1)
                 elif "k" in key:
-                    self.active_commands["backward"] = self.current_time + 0.01
+                    self.move("backward", 0.01)
                 elif "l" in key:
-                    self.active_commands["right"] = self.current_time + 0.01
+                    self.move("right", 1)
+
+    def move(self, direction='forward', distdeg=0):
+        if direction == "forward":
+            self.active_commands["forward"] = self.current_time + distdeg * self.timeForward1m
+
+        elif direction == "backward":
+            self.active_commands["backward"] = self.current_time + distdeg * self.timeBackward1m
+
+        elif direction == "left":
+            self.active_commands["left"] = self.current_time + distdeg * self.timeSpin360 / 360
+
+        elif direction == "right":
+            self.active_commands["right"] = self.current_time + distdeg * self.timeSpin360 / 360
+
+        else:
+            print("Please specify a proper direction")
 
 
 if __name__ == '__main__':
-	# Run controller function
-	ZBC = ZBController()
-	ZBC.main()
-	print("Done")
+    # Boilerplate init for non-blocking key presses
+    old_settings = None
+    init_any_key()
+
+    # Run controller function
+    ZBC = ZBController()
+    ZBC.main()
+    print("Done")
