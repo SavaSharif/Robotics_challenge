@@ -25,7 +25,7 @@ def main():
         observed_width = img_processor.get_object_width() # The width of the object in pixels.
         print("observed_width:", observed_width)
         
-        x,y = img_processor.get_object_center_coordinates()a
+        x,y = img_processor.get_object_center_coordinates()
         print("x,y:", x, y)
         # Calculate the distance to the object.
         distance = (known_object_width * focal_length) / observed_width
