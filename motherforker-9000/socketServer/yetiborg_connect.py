@@ -1,8 +1,7 @@
 import socket
 import threading
-
+import time 
 # Receiving port 8787
-# Sending port 8989
 
 BUFFER_SIZE = 1024
 SHUTDOWN_COMMANDS = ["q", "shutdown", "exit"]
@@ -21,17 +20,25 @@ class Sender(threading.Thread):
         self.img2send = None
         self.message2send = None
 
+        self.t_req = 0
+        self.t_start = 0
+        self.t_done = 0
+
     def run(self):
         sender_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sender_socket.connect((self.rec_ip, self.rec_port))
 
         while self.running:
             if self.img2send != None:
-                # TODO sending images
+                self.t_start = time.time()
+                sender_socket.sendall(self.img2send)
                 self.img2send = None
+                self.t_done = time.time()
+                print("Time passed since send img request:", self.t_done - self.t_req)
+                print("Sending time:", self.t_done - self.t_start)
                 
             if self.message2send != None:
-                sender_socket.sendall(bytes(self.message2send, "utf-8"))
+                sender_socket.sendall(bytes("msg:" + self.message2send, "utf-8"))
                 if self.message2send in SHUTDOWN_COMMANDS: self.running = False
                 self.message2send = None
 
@@ -58,9 +65,16 @@ class Receiver(threading.Thread):
         while self.running:
             received_message = conn.recv(BUFFER_SIZE)
             if received_message:
-                received_message = received_message.decode("utf-8")
-                print(received_message)
-                if received_message in SHUTDOWN_COMMANDS: self.running = False
+                print("Received message")
+                if str(received_message[0:4]) == "msg:":
+                    received_message = received_message.decode("utf-8")
+                    received_message = received_message[4:]
+                    print(received_message)
+                    if received_message in SHUTDOWN_COMMANDS: self.running = False
+                else:
+                    myfile = open("testimage.jpg", 'wb')
+                    myfile.write(received_message)
+                    myfile.close()
 
         conn.close()
         receiver_socket.close()
@@ -76,8 +90,12 @@ class YetiBorgClient:
         print("Server IP", server_ip)
         print("Yetiborg IP", yetiborg_ip)
 
-        self.receiver = Receiver(self, self.yetiborg_ip)
-        self.sender = Sender(self, self.server_ip)
+        # self.receiver = Receiver(self, self.yetiborg_ip)
+        # self.sender = Sender(self, self.server_ip)
+
+        # Local testing
+        self.receiver = Receiver(self, self.yetiborg_ip, 8787)
+        self.sender = Sender(self, self.server_ip, 8989)
 
         self.running = True
 
@@ -87,11 +105,19 @@ class YetiBorgClient:
         _ = input("Press enter to continue")
         self.sender.start()
         while self.running:
-            message = input()
-            self.sender.message2send = message
-            if message in SHUTDOWN_COMMANDS:
-                self.running = False
+            message = input("Please type something")
+            if message == "image":
+                self.sender.t_req = time.time()
+                myfile = open("face.png", "rb")
+                bytes2send = myfile.read()
+                self.sender.img2send = bytes2send
+                
+            else:
+                self.sender.message2send = message
+                if message in SHUTDOWN_COMMANDS:
+                    self.running = False
         
 
-client = YetiBorgClient('192.168.2.101', '192.168.2.103')
+# client = YetiBorgClient('192.168.2.101', '192.168.2.103')
+client = YetiBorgClient(server_ip=socket.gethostbyname(socket.gethostname()), yetiborg_ip=socket.gethostbyname(socket.gethostname()))
 client.run()
