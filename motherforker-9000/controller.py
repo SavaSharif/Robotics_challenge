@@ -7,6 +7,7 @@ import numpy as np
 
 def init_any_key():
    global old_settings
+   old_settings = None
    old_settings = termios.tcgetattr(sys.stdin)
    new_settings = termios.tcgetattr(sys.stdin)
    new_settings[3] = new_settings[3] & ~(termios.ECHO | termios.ICANON) # lflags
@@ -22,7 +23,7 @@ def term_any_key():
       termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
 
 
-def any_key():
+def any_key() -> str:
    ch_set = []
    ch = os.read(sys.stdin.fileno(), 1)
    while ch is not None and len(ch) > 0:
