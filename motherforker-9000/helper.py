@@ -1,20 +1,21 @@
 import os
 import cv2
 # from matplotlib import pyplot as plt
+from picamera.array import PiRGBArray
+from picamera import PiCamera
 import numpy as np
 import time
 
 class Camera:
-    pass
-    # def __init__(self):
-    #     self.width = 640/2
-    #     self.height = 480/2
-    #     self.frameRate = 32
-    #     self.camera = PiCamera()
-    #     self.camera.awb_mode = 'auto'
-    #     self.camera.resolution = (int(self.width), int(self.height))
-    #     self.camera.framerate = self.frameRate
-    #     self.rawCapture = PiRGBArray(self.camera, size=(int(self.width), int(self.height)))
+    def __init__(self):
+        self.width = 640/2
+        self.height = 480/2
+        self.frameRate = 32
+        self.camera = PiCamera()
+        self.camera.awb_mode = 'auto'
+        self.camera.resolution = (int(self.width), int(self.height))
+        self.camera.framerate = self.frameRate
+        self.rawCapture = PiRGBArray(self.camera, size=(int(self.width), int(self.height)))
 
 def intialize_focal_length(self, observed_width: float, known_width: float, distance: float):
         # Calculate the focal length of the camera.
