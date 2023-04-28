@@ -106,7 +106,7 @@ class ZBController:
         self.command2brake = {
             "forward" : np.array([-1.0, -1.0, -1.0, -1.0]),
             "left" : np.array([-0.5, -0.5, 0.5, 0.5]),
-            "right": np.array([0.5, 0.5, -0.5, -.5]),
+            "right": np.array([0.5, 0.5, -0.5, -0.5]),
             "backward" : np.array([0.5, 0.5, 0.5, 0.5])
         }
 
