@@ -100,8 +100,8 @@ class ZBController:
         }
 
         # Intialize servo and brake values
-        self.servos = [0.0, 0.0, 0.0, 0.0] 
-        self.brakes = [0.0, 0.0, 0.0, 0.0]
+        self.servos = np.array([0.0, 0.0, 0.0, 0.0], dtype=np.float)
+        self.brakes = np.array([0.0, 0.0, 0.0, 0.0], dtype=np.float)
 
         self.time_start = time.time()
         self.current_time = time.time()
@@ -120,8 +120,8 @@ class ZBController:
     def update_active_commands(self):
         self.current_time = time.time()
         # Reset servo and brake values
-        self.servos = np.array([0.0, 0.0, 0.0, 0.0])
-        self.brakes = np.array([0.0, 0.0, 0.0, 0.0])
+        self.servos = np.array([0.0, 0.0, 0.0, 0.0], dtype=np.float)
+        self.brakes = np.array([0.0, 0.0, 0.0, 0.0], dtype=np.float)
 
         # Check for all inputs (forward, left, right, backward)
         for comm in self.active_commands.keys():
@@ -141,7 +141,9 @@ class ZBController:
         max_val = max((max(abs(self.servos)), 1.0))
         self.servos = self.servos / max_val
 
-        
+    def are_we_moving(self):
+        return np.all(self.servos != 0.0)
+
     def update_servos(self):
         if max(self.servos) == 0.0 and max(self.servos):
             # Turn the motors off
