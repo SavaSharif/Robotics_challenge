@@ -236,7 +236,8 @@ class ZBController:
         for i in range(3):
             self.update_active_commands()
             self.update_servos()
-            
+            time.sleep(0.05)
+
         return self.ready_to_move()
         
 
