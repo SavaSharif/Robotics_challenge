@@ -92,5 +92,7 @@ class challenge3:
     # def 
 
 if __name__ == '__main__':
+    global old_settings
+    old_settings = None
     chlg3 = challenge3()
     chlg3.main()
