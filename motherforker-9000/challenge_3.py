@@ -12,7 +12,7 @@ class challenge3:
     towards it and touch it with the front of the robot and subsequently stop.
     """
     def __init__(self):
-        self.ZBC = controller.ZBController()
+        self.ZBC = controller.ZBController(user_control=False)
         self.camera = Camera()
 
         # Settings for object detection
@@ -48,15 +48,16 @@ class challenge3:
 
     def main(self):
         while self.ZBC.running:
-            self.ZBC.get_input()
+            print("Running")
+            # self.ZBC.get_input()
             if not self.sletsgo:
                 if self.object_detected():
                     direction = self.object_direction()
                     print(direction)
                     if direction == "right":
-                        self.ZBC.move("right", 1)
+                        self.ZBC.move("right", 0.1)
                     elif direction == "left":
-                        self.ZBC.move("left", 1)
+                        self.ZBC.move("left", 0.1)
                     elif direction == "forward":
                         self.sletsgo = True
                         distance = (self.known_object_width * self.focal_length) / self.image_processor.get_object_width() 
@@ -93,7 +94,7 @@ class challenge3:
     # def 
 
 if __name__ == '__main__':
-    global old_settings
-    old_settings = None
+    # global old_settings
+    # old_settings = None
     chlg3 = challenge3()
     chlg3.main()
