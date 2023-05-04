@@ -21,8 +21,8 @@ class challenge3:
         self.observed_width = 15 # The width of the object in pixels.
 
         # Calculate focal length
-        self.ZBC.camera.intialize_focal_length(self.observed_width, self.known_object_width, self.known_object_width_measured_distance)
-        self.focal_length = self.ZBC.camera.get_focal_length()
+        self.camera.intialize_focal_length(self.observed_width, self.known_object_width, self.known_object_width_measured_distance)
+        self.focal_length = self.camera.get_focal_length()
         self.sletsgo = False
 
     
@@ -45,8 +45,6 @@ class challenge3:
         else:
             return "forward"
         
-    # def get_distance(self):
-    #     pass
 
     def main(self):
         while self.ZBC.running:
@@ -54,19 +52,22 @@ class challenge3:
             if not self.sletsgo:
                 if self.object_detected():
                     direction = self.object_direction()
+                    print(direction)
                     if direction == "right":
                         self.ZBC.move("right", 1)
                     elif direction == "left":
                         self.ZBC.move("left", 1)
                     elif direction == "forward":
                         self.sletsgo = True
-                        distance = (self.known_object_width * self.focal_length) / self.image_processor.get_object_width()
-                        self.ZBC.move("forward", distance)
+                        distance = (self.known_object_width * self.focal_length) / self.image_processor.get_object_width() 
+                        print("Moving forward with distance", distance)
+                        self.ZBC.move("forward", distance / 100)
                 else:
+                    print("No object found, turning right")
                     self.ZBC.move("right", 1)
 
             self.ZBC.update_active_commands()
-            self.update_servos()
+            self.ZBC.update_servos()
 
 
     # def turn2object(self):
