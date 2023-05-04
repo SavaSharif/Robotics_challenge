@@ -207,6 +207,35 @@ class ZBController:
 
         else:
             print("Please specify a proper direction")
+            
+    def move_once(self, direction='forward', distdeg=0):
+        sleep_time = 0
+        if direction == "forward":
+            sleep_time = distdeg * self.timeForward1m
+            self.active_commands["forward"] = self.current_time + distdeg * self.timeForward1m
+
+        elif direction == "backward":
+            sleep_time = distdeg * self.timeBackward1m
+            self.active_commands["backward"] = self.current_time + distdeg * self.timeBackward1m
+
+        elif direction == "left":
+            sleep_time =  distdeg * self.timeSpin360 / 360
+            self.active_commands["left"] = self.current_time + distdeg * self.timeSpin360 / 360
+
+        elif direction == "right":
+            sleep_time =  distdeg * self.timeSpin360 / 360
+            self.active_commands["right"] = self.current_time + distdeg * self.timeSpin360 / 360
+
+        else:
+            print("Please specify a proper direction")
+            return
+        
+        self.update_active_commands()
+        self.update_servos()
+        time.sleep(sleep_time + 0.001)
+        self.update_active_commands()
+        self.update_servos()
+        
 
 
 if __name__ == '__main__':
