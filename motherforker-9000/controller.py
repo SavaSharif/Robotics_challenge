@@ -208,7 +208,7 @@ class ZBController:
         else:
             print("Please specify a proper direction")
             
-    def move_once(self, direction='forward', distdeg=0):
+    def move_once(self, direction='forward', distdeg=0) -> bool:
         sleep_time = 0
         if direction == "forward":
             sleep_time = distdeg * self.timeForward1m
@@ -235,6 +235,7 @@ class ZBController:
         time.sleep(sleep_time + 0.001)
         self.update_active_commands()
         self.update_servos()
+        return self.ready_to_move()
         
 
 
