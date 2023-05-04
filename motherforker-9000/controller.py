@@ -230,10 +230,13 @@ class ZBController:
             print("Please specify a proper direction")
             return
         
-        for i in range(4):
+        self.update_active_commands()
+        self.update_servos()
+        time.sleep(sleep_time + 0.001)
+        for i in range(3):
             self.update_active_commands()
             self.update_servos()
-            time.sleep(sleep_time + 0.001)
+            
         return self.ready_to_move()
         
 
