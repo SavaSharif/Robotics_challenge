@@ -48,22 +48,30 @@ class Challenge2:
 		self.camera.take_picture('curr_frame.jpg')
 
 	def run(self):
-		print('We are on the way!')
+		print('Are we on the way?', self.ZBC.are_we_moving(), self.ZBC.servos)
+
 		# self.ZBC.active_commands["forward"] = self.ZBC.current_time + 100
 		done = False
+		print('We are on the way!')
+		self.ZBC.move("forward", 1)
 		while not done:
-			# self.ZBC.update_active_commands()
-			# self.ZBC.update_servos()
-			# time.sleep(0.1)
+			self.ZBC.update_active_commands()
+			self.ZBC.update_servos()
+
+			# Prevent the system from overloading during the loop
+			time.sleep(0.05)
 
 			# Take image
-			self.take_curr_frame()
+			# self.take_curr_frame()
 			# print(img)
-			print('test')
-			done = True
+			print('Are we on the way?', self.ZBC.are_we_moving())
+	# done = True
+		
 
 
 if __name__ == '__main__':
+	global old_settings
+	old_settings = None
 	challenge = Challenge2()
 	challenge.run()
 	print('Done')
