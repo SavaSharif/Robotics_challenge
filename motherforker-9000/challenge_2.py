@@ -37,36 +37,60 @@ class Challenge2:
 		print('Initialisation done, object is %d CM away' % self.distance)
 
 	def avoid_object(self):
-		print('Todo')
+		# We are avoiding
+		avoiding = True
+		# Actions to avoid
+		actions = [["right", 90], ["forward", 0.30], ["left", 90]]
+		curr_action, last_action = 0, 0
+		while avoiding:
+			if self.ZBC.ready_to_move():
+				if curr_action == last_action:
+					self.ZBC.move(actions[curr_action][0], actions[curr_action][1])
+					curr_action += 1
+				else:
+					last_action += 1
+			if self.ZBC.ready_to_move() and last_action >= len(actions):
+				avoiding = False
 
-	# def getObjectDistance(self, curr_frame):
-	# 	# img_edge = cropImageTop(cannyEdgeDet(curr_frame))
-	# 	img_edge = self.imager.
-	# 	return determineDistance(img_edge)
+			# Default loop do not touch
+			self.ZBC.update_active_commands()
+			self.ZBC.update_servos()
+			# Prevent the system from overloading during the loop
+			time.sleep(0.05)
 
-	def take_curr_frame(self):
-		self.camera.take_picture('curr_frame.jpg')
+			# self.ZBC.move("left", 90)
+			# self.ZBC.move("forward", 0.20)
+			# self.ZBC.move("left", 90)
+			# self.ZBC.move("forward", 0.15)
+			# self.ZBC.move("right", 90)
 
 	def run(self):
-		print('Are we on the way?', self.ZBC.are_we_moving(), self.ZBC.servos)
+		print('Are we on the way?', self.ZBC.ready_to_move(), self.ZBC.servos)
 
 		# self.ZBC.active_commands["forward"] = self.ZBC.current_time + 100
 		done = False
+		avoided = False
 		print('We are on the way!')
 		self.ZBC.move("forward", 1)
 		while not done:
+
+			# Default loop do not touch
 			self.ZBC.update_active_commands()
 			self.ZBC.update_servos()
-
 			# Prevent the system from overloading during the loop
 			time.sleep(0.05)
+
+			if self.ZBC.ready_to_move():
+				if not avoided:
+					self.avoid_object()
+					avoided = True
+				else:
+					done = True
 
 			# Take image
 			# self.take_curr_frame()
 			# print(img)
-			print('Are we on the way?', self.ZBC.are_we_moving())
-	# done = True
-		
+			print('Are we on the way?', self.ZBC.ready_to_move())
 
 
 if __name__ == '__main__':
