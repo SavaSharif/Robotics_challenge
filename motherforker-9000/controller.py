@@ -18,9 +18,13 @@ def init_any_key():
 
 @atexit.register
 def term_any_key():
-   global old_settings
-   if old_settings:
-      termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+    try:
+       global old_settings
+       if old_settings:
+          termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+    except:
+        pass
+
 
 
 def any_key() -> str:
@@ -141,8 +145,8 @@ class ZBController:
         max_val = max((max(abs(self.servos)), 1.0))
         self.servos = self.servos / max_val
 
-    def are_we_moving(self):
-        return np.all(self.servos != 0.0)
+    def ready_to_move(self):
+        return np.all(self.servos == 0.0)
 
     def update_servos(self):
         if max(self.servos) == 0.0 and max(self.servos):
