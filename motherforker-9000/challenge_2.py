@@ -26,71 +26,30 @@ class Challenge2:
 		self.ZBC = ZBController(False)
 		# Setup Camera & ImageProcessor
 		self.camera = Camera()
-		self.camera.intialize_focal_length(observed_width, known_object_width, known_object_width_measured_distance)
+		filename = self.camera.take_picture()
+		self.img_processor = ImageProcessor(filename)
 
-		focal_length = self.camera.get_focal_length()
-		print("Initialized focal length: %d" % focal_length)
+		lowest = self.img_processor.get_lowest_pixel()
+		self.distance = self.img_processor.get_distance(lowest) - 20 # Because we like to play it safe
 
-		# curr_frame = self.take_curr_frame()
-
-		self.distance = 100#self.getObjectDistance(curr_frame)
-		print('Initialisation done, object is %d CM away' % self.distance)
+		print('Initialisation done, we are driving %d CM towards the object' % self.distance)
 
 	def avoid_object(self):
 		# We are avoiding
-		avoiding = True
-		# Actions to avoid
-		actions = [["right", 90], ["forward", 0.30], ["left", 90]]
-		curr_action, last_action = 0, 0
-		while avoiding:
-			if self.ZBC.ready_to_move():
-				if curr_action == last_action:
-					self.ZBC.move(actions[curr_action][0], actions[curr_action][1])
-					curr_action += 1
-				else:
-					last_action += 1
-			if self.ZBC.ready_to_move() and last_action >= len(actions):
-				avoiding = False
-
-			# Default loop do not touch
-			self.ZBC.update_active_commands()
-			self.ZBC.update_servos()
-			# Prevent the system from overloading during the loop
-			time.sleep(0.05)
-
-			# self.ZBC.move("left", 90)
-			# self.ZBC.move("forward", 0.20)
-			# self.ZBC.move("left", 90)
-			# self.ZBC.move("forward", 0.15)
-			# self.ZBC.move("right", 90)
+		self.ZBC.move_once("right", 90)
+		self.ZBC.move_once("forward", 0.10)
+		self.ZBC.move_once("left", 90)
+		self.ZBC.move_once("forward", 0.30)
+		self.ZBC.move_once("left", 90)
+		self.ZBC.move_once("forward", 0.10)
+		self.ZBC.move_once("right", 90)
 
 	def run(self):
-		print('Are we on the way?', self.ZBC.ready_to_move(), self.ZBC.servos)
-
-		# self.ZBC.active_commands["forward"] = self.ZBC.current_time + 100
-		done = False
-		avoided = False
+		_ = input('Do you want to drive this distance?')
 		print('We are on the way!')
-		self.ZBC.move("forward", 1)
-		while not done:
-
-			# Default loop do not touch
-			self.ZBC.update_active_commands()
-			self.ZBC.update_servos()
-			# Prevent the system from overloading during the loop
-			time.sleep(0.05)
-
-			if self.ZBC.ready_to_move():
-				if not avoided:
-					self.avoid_object()
-					avoided = True
-				else:
-					done = True
-
-			# Take image
-			# self.take_curr_frame()
-			# print(img)
-			print('Are we on the way?', self.ZBC.ready_to_move())
+		self.ZBC.move_once("forward", self.distance / 100)
+		self.avoid_object()
+		self.ZBC.move_once("forward", (150 - self.distance) / 100)
 
 
 if __name__ == '__main__':
