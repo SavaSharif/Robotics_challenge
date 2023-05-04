@@ -57,8 +57,8 @@ class ZBController:
 
 
         # Movement settings (worked out from our YetiBorg v2 on a smooth surface)
-        self.timeForward1m = 2.647                   # Number of seconds to move 1 meter forwards
-        self.timeBackward1m = 4.64                   # Number of seconds to move 1 meter backwards 
+        self.timeForward1m = 2.647 / 1.02            # Number of seconds to move 1 meter forwards
+        self.timeBackward1m = 4.64 / 0.96            # Number of seconds to move 1 meter backwards 
         self.timeSpin360   = 2.341                   # Number of seconds needed to make a full left / right spin
         self.testMode = False                        # True to run the motion tests, False to run the normal sequence
 
@@ -86,9 +86,9 @@ class ZBController:
         # Translate commands to servo outputs
         self.command2servo = { # rear right, front right, front left, rear left
             "forward" : np.array([1.0, 0.95, 1.0, 0.95]),
-            "left" : np.array([-1.0, 1.0, -1.0, 1.0]),
-            "right": np.array([1.0, -1.0, 1.0, -1.0]),
-            "backward" : np.array([-1.0, -0.95, -1.0, -0.95])
+            "left" : np.array([-1.0, 0.95, -1.0, 0.95]),
+            "right": np.array([1.0, -0.95, 1.0, -0.95]),
+            "backward" : np.array([-1.0, -0.90, -1.0, -0.90])
         }
 
         # Braking values for servos
@@ -169,11 +169,11 @@ class ZBController:
                     if "w" in key:
                         self.move("forward", 1)
                     elif "a" in key:
-                        self.move("left", 360)
+                        self.move("right", 360)
                     elif "s" in key:
                         self.move("backward", 1)
                     elif "d" in key:
-                        self.move("right", 360)
+                        self.move("left", 360)
 
                     # Small movements
                     elif "i" in key:
