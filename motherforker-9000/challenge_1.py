@@ -5,35 +5,18 @@ from helper import Camera, ImageProcessor
 
 def main():
     # Challenge 1: Detect an object in front of the robot, drive towards it, and stop when it touches it.
-    known_object_width = 7 # The width of the object in centimeters.
-    known_object_width_measured_distance = 110 # The distance at which the object was measured.
-    observed_width = 15 # The width of the object in pixels.
+
     robot = ZBController()
 
     camera = Camera()
-    camera.intialize_focal_length(observed_width, known_object_width, known_object_width_measured_distance)
-    focal_length = camera.get_focal_length()
-    print("Initialized focal length:", focal_length)
+    filename = camera.take_picture()
+    print("filename:", filename)
+    img_processor = ImageProcessor(filename)
 
-    reached_object = False
-    while not reached_object:
-        filename = camera.take_picture()
-        # filename = os.path.join(os.getcwd(), "motherforker-9000/images/sitterzaal/90cm.jpg")
-        print("filename:", filename)
-        img_processor = ImageProcessor(filename)
-        observed_width = img_processor.get_object_width() # The width of the object in pixels.
-        print("observed_width:", observed_width)
-        
-        x,y = img_processor.get_object_center_coordinates()
-        print("x,y:", x, y)
-        # Calculate the distance to the object.
-        distance = (known_object_width * focal_length) / observed_width
-        print("distance:", distance)
-        robot.move(direction="forward", distdeg = distance)
-        robot.update_active_commands()
-        robot.update_servos()
-        if distance < 5:
-            reached_object = True	
+    lowest = img_processor.get_lowest_pixel()
+    distance = img_processor.get_distance(lowest)
+
+    robot.move_once(direction="forward", distdeg = distance / 100)
 
 
 if __name__ == '__main__':

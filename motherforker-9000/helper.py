@@ -10,7 +10,7 @@ class Camera:
     def __init__(self):
         self.cam_width = 640
         self.cam_height = 480
-        self.resize_resolution = (320, 240)
+        # self.resize_resolution = (320, 240)
         self.frameRate = 32
         self.camera = PiCamera()
         self.camera.awb_mode = 'auto'
@@ -19,12 +19,12 @@ class Camera:
         # self.rawCapture = PiRGBArray(self.camera, size=(int(self.width), int(self.height))) #NOT USED?
 
     def intialize_focal_length(self, observed_width: float, known_width: float, distance: float):
-            # Calculate the focal length of the camera.
+            # Calculate the focal length of the camera by the lowest pixel
             self.focal_length = (observed_width * distance) / known_width
 
     def take_picture(self, filename = time.strftime("%Y-%m-%d_%H-%M-%S") + '.jpg') -> str:
             # Take a picture and save it to the current directory with the date and time as the filename
-            self.camera.capture(filename, resize=self.resize_resolution)
+            self.camera.capture(filename)
             return filename
 
     def get_focal_length(self) -> float:
@@ -33,20 +33,32 @@ class Camera:
 
 class ImageProcessor:
     def __init__(self, filename: str):
-        self.image = cv2.imread(filename)
-        self.image = cv2.flip(self.image, -1)
-        img_rgb = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
-        edges = cv2.Canny(img_rgb,200,500)
-        contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        self.largest_contour = max(contours, key=cv2.contourArea)
+        img = cv2.imread(filename)
+        img = cv2.flip(img, -1)
+        self.image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-    def crop_image_top(self, image: np.ndarray) -> np.ndarray:
+        self.horizon = 223
+        
+        self.edges = cv2.Canny(self.image,200,500)
+        self.knipknip = self.edges[self.horizon:,200:440]
+
+    def crop_image_top(self):
         """
         Crop the top 50 pixels of an image
         :param img: An array with rgb image data
         :return: Cropped image
         """
-        return image[50:,:]
+        self.image = self.image[50:,:]
+    
+    def get_lowest_pixel(self) -> float:
+        y = max(np.where(self.knipknip == 255)[0])
+        print("Lowest edge pixel:", y)
+        return y
+    
+    def get_distance(self, lowest_pixel) -> float:
+        distance = 8.2 / np.tan(lowest_pixel * np.arctan(8.2/16) / self.horizon)
+        print("Calculated distance:", distance)
+        return distance
 
     def open_image(self, filename) -> np.ndarray:
         """
@@ -83,5 +95,3 @@ class ImageProcessor:
 
         return cx, cy
 
-def get_distance(known_object_width: float, focal_length: float, observed_width: float) -> float:
-    return (known_object_width * focal_length) / observed_width
