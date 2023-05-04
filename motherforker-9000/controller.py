@@ -86,16 +86,16 @@ class ZBController:
         # Translate commands to servo outputs
         self.command2servo = { # rear right, front right, front left, rear left
             "forward" : np.array([1.0, 0.95, 1.0, 0.95]),
-            "left" : np.array([1.0, -1.0, 1.0, -1.0]),
-            "right": np.array([-1.0, 1.0, -1.0, 1.0]),
+            "left" : np.array([-1.0, 1.0, -1.0, 1.0]),
+            "right": np.array([1.0, -1.0, 1.0, -1.0]),
             "backward" : np.array([-1.0, -0.95, -1.0, -0.95])
         }
 
         # Braking values for servos
         self.command2brake = {
             "forward" : np.array([-1.0, -0.95, -1.0, -0.95]),
-            "left" : np.array([-0.5, 0.5, -0.5, 0.5]),
-            "right": np.array([0.5, -0.5, 0.5, -0.5]),
+            "left" : np.array([0.5, -0.5, 0.5, -0.5]),
+            "right": np.array([-0.5, 0.5, -0.5, 0.5]),
             "backward" : np.array([0.5, 0.475, 0.5, 0.475])
         }
 
