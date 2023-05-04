@@ -1,6 +1,7 @@
 import controller
 from helper import Camera, ImageProcessor
 import numpy as np
+import time
 
 class challenge3:
     """
@@ -27,7 +28,8 @@ class challenge3:
 
     
     def capture_process_image(self):
-        self.filename = self.camera.take_picture()
+        self.filename = self.camera.take_picture(time.strftime("%Y-%m-%d_%H-%M-%S") + '.jpg')
+        print("Image cauptured with name", self.filename)
         self.image_processor = ImageProcessor(self.filename)        
 
     def object_detected(self) -> bool:
@@ -53,11 +55,11 @@ class challenge3:
             if not self.sletsgo:
                 if self.object_detected():
                     direction = self.object_direction()
-                    print(direction)
+                    print("Object in sight", direction)
                     if direction == "right":
-                        self.ZBC.move("right", 0.1)
+                        self.ZBC.move("right", 0.5)
                     elif direction == "left":
-                        self.ZBC.move("left", 0.1)
+                        self.ZBC.move("left", 0.5)
                     elif direction == "forward":
                         self.sletsgo = True
                         distance = (self.known_object_width * self.focal_length) / self.image_processor.get_object_width() 
@@ -65,7 +67,7 @@ class challenge3:
                         self.ZBC.move("forward", distance / 100)
                 else:
                     print("No object found, turning right")
-                    self.ZBC.move("right", 1)
+                    self.ZBC.move("right", 0.5)
 
             self.ZBC.update_active_commands()
             self.ZBC.update_servos()
@@ -94,7 +96,7 @@ class challenge3:
     # def 
 
 if __name__ == '__main__':
-    # global old_settings
-    # old_settings = None
+    global old_settings
+    old_settings = None
     chlg3 = challenge3()
     chlg3.main()
