@@ -25,7 +25,7 @@ class Challenge2:
 		self.img_processor = ImageProcessor(filename)
 
 		lowest = self.img_processor.get_lowest_pixel()
-		self.distance = self.img_processor.get_distance(lowest) - 20 # Because we like to play it safe
+		self.distance = self.img_processor.get_distance(lowest) - 7 # Because we like to play it safe
 
 		print('Initialisation done, we are driving %d CM towards the object' % self.distance)
 
@@ -34,7 +34,7 @@ class Challenge2:
 		self.ZBC.move_once("right", 90)
 		self.ZBC.move_once("forward", 0.10)
 		self.ZBC.move_once("left", 90)
-		self.ZBC.move_once("forward", 0.30)
+		self.ZBC.move_once("forward", 0.35)
 		self.ZBC.move_once("left", 90)
 		self.ZBC.move_once("forward", 0.10)
 		self.ZBC.move_once("right", 90)
