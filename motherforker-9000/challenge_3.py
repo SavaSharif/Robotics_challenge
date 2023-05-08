@@ -50,9 +50,9 @@ class challenge3:
                     direction = self.object_direction()
                     print("Object in sight", direction)
                     if direction == "right":
-                        self.ZBC.move_once("right", 5)
+                        self.ZBC.move_once("right", 10)
                     elif direction == "left":
-                        self.ZBC.move_once("left", 5)
+                        self.ZBC.move_once("left", 10)
                     elif direction == "forward":
                         self.sletsgo = True
                         lowest_pixel = self.image_processor.get_lowest_pixel()
@@ -61,7 +61,7 @@ class challenge3:
                         self.ZBC.move_once("forward", distance / 100)
                 else:
                     print("No object found, turning right")
-                    self.ZBC.move_once("right", 5)
+                    self.ZBC.move_once("left", 10)
 
 
 
