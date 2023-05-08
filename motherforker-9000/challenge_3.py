@@ -15,21 +15,12 @@ class challenge3:
     def __init__(self):
         self.ZBC = controller.ZBController(user_control=False)
         self.camera = Camera()
-
-        # Settings for object detection
-        self.known_object_width = 7 # The width of the object in centimeters.
-        self.known_object_width_measured_distance = 110 # The distance at which the object was measured.
-        self.observed_width = 15 # The width of the object in pixels.
-
-        # Calculate focal length
-        self.camera.intialize_focal_length(self.observed_width, self.known_object_width, self.known_object_width_measured_distance)
-        self.focal_length = self.camera.get_focal_length()
         self.sletsgo = False
 
     
     def capture_process_image(self):
-        self.filename = self.camera.take_picture(time.strftime("%Y-%m-%d_%H-%M-%S") + '.jpg')
-        print("Image cauptured with name", self.filename)
+        self.filename = self.camera.take_picture()
+        print("Image captured with name", self.filename)
         self.image_processor = ImageProcessor(self.filename)        
 
     def object_detected(self) -> bool:
@@ -40,9 +31,9 @@ class challenge3:
     
     def object_direction(self) -> str:
         x_mean = self.image_processor.edges[:,1].mean()
-        if x_mean < 155:
+        if x_mean < 300:
             return "left"
-        elif x_mean > 160:
+        elif x_mean > 340:
             return "right"
         else:
             return "forward"
@@ -62,7 +53,7 @@ class challenge3:
                         self.ZBC.move("left", 0.5)
                     elif direction == "forward":
                         self.sletsgo = True
-                        distance = (self.known_object_width * self.focal_length) / self.image_processor.get_object_width() 
+                        distance = self.image_processor.get_object_width() 
                         print("Moving forward with distance", distance)
                         self.ZBC.move("forward", distance / 100)
                 else:
@@ -72,28 +63,6 @@ class challenge3:
             self.ZBC.update_active_commands()
             self.ZBC.update_servos()
 
-
-    # def turn2object(self):
-    #     """
-    #     Slowly turn right until object is in center part of the image
-    #     """
-    #     filename = self.camera.take_picture()
-    #     self.image_processor = ImageProcessor(filename)
-
-    #     while self.object_not_found:
-    #         # turn left
-    #         # take picture
-    #         # Evaluate if object is seen
-
-    #         filename = self.camera.take_picture()
-            
-
-
-    # def drive2object(self):
-    #     if self.dist != None:
-    #         self.ZBC.move("forward", self.dist)
-
-    # def 
 
 if __name__ == '__main__':
     global old_settings
