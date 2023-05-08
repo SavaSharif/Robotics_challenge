@@ -194,16 +194,16 @@ class ZBController:
 
     def move(self, direction='forward', distdeg=0):
         if direction == "forward":
-            self.active_commands["forward"] = self.current_time + distdeg * self.timeForward1m
+            self.active_commands["forward"] = time.time() + distdeg * self.timeForward1m
 
         elif direction == "backward":
-            self.active_commands["backward"] = self.current_time + distdeg * self.timeBackward1m
+            self.active_commands["backward"] = time.time() + distdeg * self.timeBackward1m
 
         elif direction == "left":
-            self.active_commands["left"] = self.current_time + distdeg * self.timeSpin360 / 360
+            self.active_commands["left"] = time.time() + distdeg * self.timeSpin360 / 360
 
         elif direction == "right":
-            self.active_commands["right"] = self.current_time + distdeg * self.timeSpin360 / 360
+            self.active_commands["right"] = time.time() + distdeg * self.timeSpin360 / 360
 
         else:
             print("Please specify a proper direction")
@@ -212,19 +212,19 @@ class ZBController:
         sleep_time = 0
         if direction == "forward":
             sleep_time = distdeg * self.timeForward1m
-            self.active_commands["forward"] = self.current_time + distdeg * self.timeForward1m
+            self.active_commands["forward"] = time.time() + distdeg * self.timeForward1m
 
         elif direction == "backward":
             sleep_time = distdeg * self.timeBackward1m
-            self.active_commands["backward"] = self.current_time + distdeg * self.timeBackward1m
+            self.active_commands["backward"] = time.time() + distdeg * self.timeBackward1m
 
         elif direction == "left":
             sleep_time =  distdeg * self.timeSpin360 / 360
-            self.active_commands["left"] = self.current_time + distdeg * self.timeSpin360 / 360
+            self.active_commands["left"] = time.time() + distdeg * self.timeSpin360 / 360
 
         elif direction == "right":
             sleep_time =  distdeg * self.timeSpin360 / 360
-            self.active_commands["right"] = self.current_time + distdeg * self.timeSpin360 / 360
+            self.active_commands["right"] = time.time() + distdeg * self.timeSpin360 / 360
 
         else:
             print("Please specify a proper direction")
