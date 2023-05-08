@@ -54,17 +54,17 @@ class challenge3:
                     direction = self.object_direction()
                     print("Object in sight", direction)
                     if direction == "right":
-                        self.ZBC.move("right", 0.5)
+                        self.ZBC.move_once("right", 0.5)
                     elif direction == "left":
-                        self.ZBC.move("left", 0.5)
+                        self.ZBC.move_once("left", 0.5)
                     elif direction == "forward":
                         self.sletsgo = True
-                        distance = self.image_processor.get_object_width() 
+                        distance = self.image_processor.get_distance() 
                         print("Moving forward with distance", distance)
-                        self.ZBC.move("forward", distance / 100)
+                        self.ZBC.move_once("forward", distance / 100)
                 else:
                     print("No object found, turning right")
-                    self.ZBC.move("right", 0.5)
+                    self.ZBC.move_once("right", 0.5)
 
             self.ZBC.update_active_commands()
             self.ZBC.update_servos()
