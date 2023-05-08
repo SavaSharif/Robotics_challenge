@@ -17,11 +17,6 @@ class Challenge2:
 	"""
 
 	def __init__(self):
-		# META variables
-		known_object_width = 7  # The width of the object in centimeters.
-		known_object_width_measured_distance = 110  # The distance at which the object was measured.
-		observed_width = 15  # The width of the object in pixels.
-
 		# Setup ZB controller
 		self.ZBC = ZBController(False)
 		# Setup Camera & ImageProcessor
