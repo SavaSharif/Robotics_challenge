@@ -24,50 +24,45 @@ class challenge3:
 
     def object_detected(self) -> bool:
         self.capture_process_image()
-        bla = np.argwhere(self.image_processor.edges)[0]
-        print(bla)
-        if len(bla) > 3:
+        distance = self.image_processor.get_distance(self.image_processor.get_lowest_pixel())
+        if len(np.argwhere(self.image_processor.edges)) > 3 and distance < 150 :
             print("Object detected")
             return True
         return False
     
     def object_direction(self) -> str:
-        x_mean = self.image_processor.edges[:,1].mean()
-        print("mean:", x_mean)
-        if x_mean < 300:
-            print("Going to the left")
+        edge_list = np.argwhere(self.image_processor.edges)
+        x_mean = edge_list.mean()
+        print(x_mean)
+        if x_mean < 250:
             return "left"
-        elif x_mean > 340:
-            print("Going to the right")
+        elif x_mean > 390:
             return "right"
         else:
-            print("Going forward")
             return "forward"
         
 
     def main(self):
         while self.ZBC.running:
-            print("Running")
             # self.ZBC.get_input()
             if not self.sletsgo:
                 if self.object_detected():
                     direction = self.object_direction()
                     print("Object in sight", direction)
                     if direction == "right":
-                        self.ZBC.move_once("right", 0.5)
+                        self.ZBC.move_once("right", 5)
                     elif direction == "left":
-                        self.ZBC.move_once("left", 0.5)
+                        self.ZBC.move_once("left", 5)
                     elif direction == "forward":
                         self.sletsgo = True
-                        distance = self.image_processor.get_distance() 
+                        lowest_pixel = self.image_processor.get_lowest_pixel()
+                        distance = self.image_processor.get_distance(lowest_pixel) 
                         print("Moving forward with distance", distance)
                         self.ZBC.move_once("forward", distance / 100)
                 else:
                     print("No object found, turning right")
-                    self.ZBC.move_once("right", 0.5)
+                    self.ZBC.move_once("right", 5)
 
-            self.ZBC.update_active_commands()
-            self.ZBC.update_servos()
 
 
 if __name__ == '__main__':
