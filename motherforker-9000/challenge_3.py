@@ -16,7 +16,6 @@ class challenge3:
         self.ZBC = controller.ZBController(user_control=False)
         self.camera = Camera()
         self.sletsgo = False
-
     
     def capture_process_image(self):
         self.filename = self.camera.take_picture()
@@ -25,17 +24,24 @@ class challenge3:
 
     def object_detected(self) -> bool:
         self.capture_process_image()
-        if len(np.argwhere(self.image_processor.edges)[0]) > 3:
+        bla = np.argwhere(self.image_processor.edges)[0]
+        print(bla)
+        if len(bla) > 3:
+            print("Object detected")
             return True
         return False
     
     def object_direction(self) -> str:
         x_mean = self.image_processor.edges[:,1].mean()
+        print("mean:", x_mean)
         if x_mean < 300:
+            print("Going to the left")
             return "left"
         elif x_mean > 340:
+            print("Going to the right")
             return "right"
         else:
+            print("Going forward")
             return "forward"
         
 
