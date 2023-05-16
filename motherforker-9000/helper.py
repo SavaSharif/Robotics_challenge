@@ -3,8 +3,80 @@ import cv2
 # from matplotlib import pyplot as plt
 from picamera.array import PiRGBArray
 from picamera import PiCamera
+import RPi.GPIO as GPIO
+import pigpio
 import numpy as np
 import time
+
+
+class Forker:
+    def __init__(self):
+        # Run pigpiod
+        #os.system('sudo pigpiod')
+
+        # Setup servo pins
+        self.close_servo = 25
+        self.updown_servo = 9
+
+        # init servo's
+        self.pwm = pigpio.pi()
+        self.pwm.set_mode(self.close_servo, pigpio.OUTPUT)
+        self.pwm.set_mode(self.updown_servo, pigpio.OUTPUT)
+
+        # Open arm
+        self.curr_close_servo = 2000
+        self.pwm.set_servo_pulsewidth(self.close_servo, self.curr_close_servo)
+        # Lower arm
+        self.curr_updown_servo = 1250
+        self.pwm.set_servo_pulsewidth(self.updown_servo, self.curr_updown_servo)
+
+    def pickup_object(self):
+        steps = 25
+        while self.curr_close_servo > 900:
+            self.pwm.set_servo_pulsewidth(self.close_servo, self.curr_close_servo)
+            self.curr_close_servo = self.curr_close_servo - steps
+            time.sleep(.1)
+        while self.curr_updown_servo > 1000:
+            self.pwm.set_servo_pulsewidth(self.updown_servo, self.curr_updown_servo)
+            self.curr_updown_servo = self.curr_updown_servo - steps
+            time.sleep(.1)
+
+    def putdown_object(self):
+        steps = 25
+        while self.curr_updown_servo < 1300:
+            self.pwm.set_servo_pulsewidth(self.updown_servo, self.curr_updown_servo)
+            self.curr_updown_servo = self.curr_updown_servo + steps
+            time.sleep(.1)
+        while self.curr_close_servo < 2000:
+            self.pwm.set_servo_pulsewidth(self.close_servo, self.curr_close_servo)
+            self.curr_close_servo = self.curr_close_servo + steps
+            time.sleep(.1)
+
+    def pulse_width_module_cleanup(self):
+        # Reset pos
+        self.pwm.set_servo_pulsewidth(self.close_servo, 2000)
+        self.pwm.set_servo_pulsewidth(self.updown_servo, 1250)
+        # Cleanup
+        self.pwm.set_PWM_dutycycle(self.close_servo, 0)
+        self.pwm.set_PWM_frequency(self.close_servo, 0)
+        self.pwm.set_PWM_dutycycle(self.updown_servo, 0)
+        self.pwm.set_PWM_frequency(self.updown_servo, 0)
+
+    def main(self):
+        self.pickup_object()
+        time.sleep(2)
+        self.putdown_object()
+        # TMP
+        time.sleep(5)
+        self.pulse_width_module_cleanup()
+
+
+if __name__ == '__main__':
+    # Run controller function
+    forker = Forker()
+    forker.main()
+    print("Done")
+
 
 class Camera:
     def __init__(self):
