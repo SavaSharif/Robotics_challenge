@@ -8,59 +8,58 @@ import pigpio
 import numpy as np
 import time
 
-
 class Forker:
     def __init__(self):
         # Run pigpiod
-        #os.system('sudo pigpiod')
+        processes = os.popen("ps -Af").read()
+        if not processes.count('pigpiod'):
+            print('pigpiod is not running, starting pigpiod...')
+            os.system('sudo pigpiod')
+        else:
+            print('pigpiod is running...')
 
         # Setup servo pins
-        self.close_servo = 25
-        self.updown_servo = 9
+        self.close_servo = {'id':25, 'value':2000}
+        self.updown_servo = {'id':9, 'value':1250}
 
         # init servo's
         self.pwm = pigpio.pi()
-        self.pwm.set_mode(self.close_servo, pigpio.OUTPUT)
-        self.pwm.set_mode(self.updown_servo, pigpio.OUTPUT)
+        self.pwm.set_mode(self.close_servo['id'], pigpio.OUTPUT)
+        self.pwm.set_mode(self.updown_servo['id'], pigpio.OUTPUT)
 
         # Open arm
-        self.curr_close_servo = 2000
-        self.pwm.set_servo_pulsewidth(self.close_servo, self.curr_close_servo)
+        self.pwm.set_servo_pulsewidth(self.close_servo['id'], self.close_servo['value'])
         # Lower arm
-        self.curr_updown_servo = 1250
-        self.pwm.set_servo_pulsewidth(self.updown_servo, self.curr_updown_servo)
+        self.pwm.set_servo_pulsewidth(self.updown_servo['id'], self.updown_servo['value'])
 
     def pickup_object(self):
-        steps = 25
-        while self.curr_close_servo > 900:
-            self.pwm.set_servo_pulsewidth(self.close_servo, self.curr_close_servo)
-            self.curr_close_servo = self.curr_close_servo - steps
-            time.sleep(.1)
-        while self.curr_updown_servo > 1000:
-            self.pwm.set_servo_pulsewidth(self.updown_servo, self.curr_updown_servo)
-            self.curr_updown_servo = self.curr_updown_servo - steps
-            time.sleep(.1)
+        self.__move_servo_to(900, self.close_servo)
+        self.__move_servo_to(1000, self.updown_servo)
 
     def putdown_object(self):
-        steps = 25
-        while self.curr_updown_servo < 1300:
-            self.pwm.set_servo_pulsewidth(self.updown_servo, self.curr_updown_servo)
-            self.curr_updown_servo = self.curr_updown_servo + steps
-            time.sleep(.1)
-        while self.curr_close_servo < 2000:
-            self.pwm.set_servo_pulsewidth(self.close_servo, self.curr_close_servo)
-            self.curr_close_servo = self.curr_close_servo + steps
-            time.sleep(.1)
+        self.__move_servo_to(1250, self.updown_servo)
+        self.__move_servo_to(2000, self.close_servo)
+
+    def __move_servo_to(self, to, servo, steps=10):
+        if servo['value'] < to:
+            [self.__set_servo(servo['id'], step) for step in range(servo['value'], to, steps)]
+        else:
+            [self.__set_servo(servo['id'], step) for step in range(servo['value'], to, -steps)]
+        servo['value'] = to
+
+    def __set_servo(self, servo, value):
+        self.pwm.set_servo_pulsewidth(servo, value)
+        time.sleep(.1)
 
     def pulse_width_module_cleanup(self):
         # Reset pos
-        self.pwm.set_servo_pulsewidth(self.close_servo, 2000)
-        self.pwm.set_servo_pulsewidth(self.updown_servo, 1250)
+        self.__move_servo_to(2000, self.close_servo)
+        self.__move_servo_to(1250, self.updown_servo)
         # Cleanup
-        self.pwm.set_PWM_dutycycle(self.close_servo, 0)
-        self.pwm.set_PWM_frequency(self.close_servo, 0)
-        self.pwm.set_PWM_dutycycle(self.updown_servo, 0)
-        self.pwm.set_PWM_frequency(self.updown_servo, 0)
+        self.pwm.set_PWM_dutycycle(self.close_servo['id'], 0)
+        self.pwm.set_PWM_frequency(self.close_servo['id'], 0)
+        self.pwm.set_PWM_dutycycle(self.updown_servo['id'], 0)
+        self.pwm.set_PWM_frequency(self.updown_servo['id'], 0)
 
     def main(self):
         self.pickup_object()
@@ -69,13 +68,6 @@ class Forker:
         # TMP
         time.sleep(5)
         self.pulse_width_module_cleanup()
-
-
-if __name__ == '__main__':
-    # Run controller function
-    forker = Forker()
-    forker.main()
-    print("Done")
 
 
 class Camera:
