@@ -21,9 +21,14 @@ An easy way to work with the yetiborg is to install [Cyberduck](https://cyberduc
 ### Use python3
 alias python=python3
 
+### Control the arm
+To control the servor arm with the helper functions make sure that pigpiod is running.
+To run it:
+> sudo pigpiod
+
 ## TODO
 - [x] Export 2023_start_here zip to git
 - [x] Find an easy way to launch scripts on the yetiborg
 - [x] Configure python3 on the yetiborg
 - [x] Create ~~.mp4~~ .jpeg series so we can offline work on it
-- [ ] Design arm mount
+- [x] Design arm mount
