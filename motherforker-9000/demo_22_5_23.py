@@ -30,9 +30,12 @@ def main():
     print('We are on the way!')
 
     robot.move_once(direction="forward", distdeg = distance / 100)
-
-    
     forker.pickup_object()
+
+    robot.move_once(direction="right", distdeg = 180)
+    robot.move_once(direction="forward", distdeg = distance / 100)
+    forker.putdown_object()
+    forker.move_fork(direction="backward", distdeg = 0.1)
     forker.pulse_width_module_cleanup()
 
 
