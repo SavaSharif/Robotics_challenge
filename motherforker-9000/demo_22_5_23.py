@@ -22,8 +22,8 @@ def main():
     img_processor = ImageProcessor(filename)
 
     img_processor.apply_knipknip()
-    edges = img_processor.detect_edges()
-    distance = img_processor.get_distance(edges) - 10
+    edges = img_processor.detect_color()
+    distance = img_processor.get_distance(edges)
 
     print('Initialisation done, we are driving %d CM towards the object' % distance)
     _ = input('Do you want to drive this distance?')
