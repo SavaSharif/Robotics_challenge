@@ -23,9 +23,10 @@ class Challenge2:
 		self.camera = Camera()
 		filename = self.camera.take_picture()
 		self.img_processor = ImageProcessor(filename)
-
-		lowest = self.img_processor.get_lowest_pixel()
-		self.distance = self.img_processor.get_distance(lowest) - 7 # Because we like to play it safe
+		
+		self.img_processor.apply_knipknip()
+		edges = self.img_processor.detect_edges()
+		self.distance = self.img_processor.get_distance(edges) - 7 # Because we like to play it safe
 
 		print('Initialisation done, we are driving %d CM towards the object' % self.distance)
 

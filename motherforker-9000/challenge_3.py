@@ -20,18 +20,20 @@ class challenge3:
     def capture_process_image(self):
         self.filename = self.camera.take_picture()
         print("Image captured with name", self.filename)
-        self.image_processor = ImageProcessor(self.filename)        
+        self.image_processor = ImageProcessor(self.filename)
+        self.image_processor.apply_knipknip()        
 
     def object_detected(self) -> bool:
         self.capture_process_image()
-        distance = self.image_processor.get_distance(self.image_processor.get_lowest_pixel())
-        if len(np.argwhere(self.image_processor.edges)) > 3 and distance < 150 :
+        self.edges = self.image_processor.detect_edges()
+        distance = self.image_processor.get_distance(self.edges)
+        if len(np.argwhere(self.edges)) > 3 and distance < 150 :
             print("Object detected")
             return True
         return False
     
     def object_direction(self) -> str:
-        edge_list = np.argwhere(self.image_processor.edges)
+        edge_list = np.argwhere(self.edges)
         x_mean = edge_list.mean()
         print(x_mean)
         if x_mean < 250:
@@ -55,8 +57,7 @@ class challenge3:
                         self.ZBC.move_once("left", 10)
                     elif direction == "forward":
                         self.sletsgo = True
-                        lowest_pixel = self.image_processor.get_lowest_pixel()
-                        distance = self.image_processor.get_distance(lowest_pixel) 
+                        distance = self.image_processor.get_distance(self.edges) 
                         print("Moving forward with distance", distance)
                         self.ZBC.move_once("forward", distance / 100)
                 else:

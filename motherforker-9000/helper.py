@@ -31,6 +31,7 @@ class Forker:
         self.pwm.set_servo_pulsewidth(self.close_servo['id'], self.close_servo['value'])
         # Lower arm
         self.pwm.set_servo_pulsewidth(self.updown_servo['id'], self.updown_servo['value'])
+        self.putdown_object()
 
     def pickup_object(self):
         self.__move_servo_to(900, self.close_servo)
@@ -49,7 +50,7 @@ class Forker:
 
     def __set_servo(self, servo, value):
         self.pwm.set_servo_pulsewidth(servo, value)
-        time.sleep(.1)
+        time.sleep(.05)
 
     def pulse_width_module_cleanup(self):
         # Reset pos
@@ -99,63 +100,68 @@ class ImageProcessor:
     def __init__(self, filename: str):
         img = cv2.imread(filename)
         img = cv2.flip(img, -1)
+
         self.image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
         self.horizon = 223
-        
-        self.edges = cv2.Canny(self.image,200,500)
-        self.knipknip = self.edges[self.horizon:,200:440]
+    
+    def apply_knipknip(self) -> np.ndarray:
+        self.image = self.image[self.horizon:,200:440]
 
-    def crop_image_top(self):
+    def detect_edges(self) -> np.ndarray:
         """
-        Crop the top 50 pixels of an image
+        Detect the edges of an image
         :param img: An array with rgb image data
-        :return: Cropped image
+        :return: An array with the edges of the image
         """
-        self.image = self.image[50:,:]
-    
-    def get_lowest_pixel(self) -> float:
-        y = max(np.where(self.knipknip == 255)[0])
-        print("Lowest edge pixel:", y)
-        return y
-    
-    def get_distance(self, lowest_pixel) -> float:
-        distance = 8.2 / np.tan(lowest_pixel * np.arctan(8.2/16) / self.horizon)
+        print("Detecting edges...")
+        return cv2.Canny(self.image,200,500)
+
+    def detect_color(self) -> np.ndarray:
+        """
+        Detect the color of an image
+        :param img: An array with rgb image data
+        :return: An array with the color of the image
+        """
+        print("Detecting color...")
+        # Define the color ranges
+        min_hue = 140
+        max_hue = 160
+        min_sat = 50
+        max_sat = 255
+        min_val = 50
+        max_val = 255
+
+        # Blur the image to reduce noise
+        img_blur = cv2.GaussianBlur(self.image,(5,5),0)
+        img_hsv = cv2.cvtColor(img_blur, cv2.COLOR_RGB2HSV)
+
+        return cv2.inRange(img_hsv, (min_hue, min_sat, min_val), (max_hue, max_sat, max_val))
+
+    def detect_contours(self):
+        """
+        Detect the contours of an image
+        :param img: An array with rgb image data
+        :return: An array with the contours of the image
+        """
+        print("Detecting contours...")
+        self.contours, _ = cv2.findContours(self.image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    def crop_image(self, part: str, pixels: int):
+        # Crop the image to the part of the image we are interested in
+        if part == 'top':
+            self.image = self.image[:pixels, :]
+        elif part == 'bottom':
+            self.image = self.image[-pixels:, :]
+        elif part == 'left':
+            self.image = self.image[:, :pixels]
+        elif part == 'right':
+            self.image = self.image[:, -pixels:]
+        else:
+            print('Invalid part name!')
+
+    def get_distance(self, img: np.ndarray) -> float:
+        y = max(np.where(img == 255)[0])
+        distance = 8.2 / np.tan(y * np.arctan(8.2/16) / self.horizon)
         print("Calculated distance:", distance)
         return distance
-
-    def open_image(self, filename) -> np.ndarray:
-        """
-        Open an image file and return it as a numpy array
-        :param filename: The filename of the image to open
-        :return: The image as a numpy array
-        """
-        if os.path.isfile(filename):
-            img = cv2.imread(filename)
-            img = cv2.flip(img, -1)
-            return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        else:
-            print('Image file %s does NOT exist!' % filename)
-            return None
-
-    def get_object_contours(self) -> np.ndarray:
-        # Get the contours of the object in the image.
-        return self.largest_contour
-
-    def get_object_width(self) -> float:
-        # Get the leftmost and rightmost points of the object.
-        leftmost = tuple(self.largest_contour[self.largest_contour[:,:,0].argmin()][0])
-        rightmost = tuple(self.largest_contour[self.largest_contour[:,:,0].argmax()][0])
-        # Calculate the width of the object.
-        width = rightmost[0] - leftmost[0]
-        return width
-
-    def get_object_center_coordinates(self) -> tuple:
-        # Get the center coordinates of the object.
-        M = cv2.moments(self.largest_contour)
-        cx = int(M['m10']/M['m00'])
-        cy = int(M['m01']/M['m00'])
-        print("middle point of largest contour:", cx, cy)
-
-        return cx, cy
 

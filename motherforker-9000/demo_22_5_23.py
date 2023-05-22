@@ -20,8 +20,9 @@ def main():
     print("filename:", filename)
     img_processor = ImageProcessor(filename)
 
-    lowest = img_processor.get_lowest_pixel()
-    distance = img_processor.get_distance(lowest)
+    img_processor.apply_knipknip()
+    edges = img_processor.detect_color()
+    distance = img_processor.get_distance(edges) - 10
 
     print('Initialisation done, we are driving %d CM towards the object' % distance)
     _ = input('Do you want to drive this distance?')
