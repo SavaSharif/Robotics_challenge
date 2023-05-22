@@ -124,8 +124,8 @@ class ImageProcessor:
         """
         print("Detecting color...")
         # Define the color ranges
-        min_hue = 140
-        max_hue = 160
+        min_hue = 120
+        max_hue = 150
         min_sat = 50
         max_sat = 255
         min_val = 50
