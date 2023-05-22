@@ -31,11 +31,14 @@ def main():
 
     robot.move_once(direction="forward", distdeg = distance / 100)
     forker.pickup_object()
+    _ = input('Do I have the object?')
+    print("Driving around!")
 
-    robot.move_once(direction="right", distdeg = 180)
+
+    robot.move_once(direction="right", distdeg = 150)
     robot.move_once(direction="forward", distdeg = distance / 100)
     forker.putdown_object()
-    forker.move_fork(direction="backward", distdeg = 0.1)
+    robot.move_once(direction="backward", distdeg = 0.1)
     forker.pulse_width_module_cleanup()
 
 
