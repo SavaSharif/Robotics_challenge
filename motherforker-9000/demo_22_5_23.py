@@ -14,6 +14,7 @@ def main():
     - Verplaats object
     """
     robot = ZBController()
+    forker = Forker()
 
     camera = Camera()
     filename = camera.take_picture()
@@ -21,7 +22,7 @@ def main():
     img_processor = ImageProcessor(filename)
 
     img_processor.apply_knipknip()
-    edges = img_processor.detect_color()
+    edges = img_processor.detect_edges()
     distance = img_processor.get_distance(edges) - 10
 
     print('Initialisation done, we are driving %d CM towards the object' % distance)
@@ -30,7 +31,7 @@ def main():
 
     robot.move_once(direction="forward", distdeg = distance / 100)
 
-    forker = Forker()
+    
     forker.pickup_object()
     forker.pulse_width_module_cleanup()
 
