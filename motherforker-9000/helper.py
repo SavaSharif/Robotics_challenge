@@ -1,9 +1,7 @@
 import os
 import cv2
 # from matplotlib import pyplot as plt
-from picamera.array import PiRGBArray
 from picamera import PiCamera
-import RPi.GPIO as GPIO
 import pigpio
 import numpy as np
 import time

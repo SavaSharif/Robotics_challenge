@@ -1,7 +1,6 @@
 import controller
 from helper import Camera, ImageProcessor
 import numpy as np
-import time
 
 class challenge3:
     """

@@ -1,8 +1,6 @@
 import ZeroBorg3 as ZeroBorg
-from picamera.array import PiRGBArray
-from picamera import PiCamera
 import sys, time
-import tty, termios, fcntl, os, atexit
+import termios, os, atexit
 import numpy as np
 
 def init_any_key():

@@ -1,11 +1,6 @@
 from controller import ZBController
 from helper import *
-import time
-import numpy as np
-import cv2
 
-from picamera.array import PiRGBArray
-from picamera import PiCamera
 
 class Challenge2:
 	"""
