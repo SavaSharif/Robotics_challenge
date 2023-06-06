@@ -100,10 +100,11 @@ class ImageProcessor:
         img = cv2.flip(img, -1)
 
         self.image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        self.horizon = 223
+        self.horizon = 157
+        self.arm = 370
     
     def apply_knipknip(self) -> np.ndarray:
-        self.image = self.image[self.horizon:,200:440]
+        self.image = self.image[self.horizon:self.arm,200:440]
 
     def detect_edges(self) -> np.ndarray:
         """
@@ -114,7 +115,7 @@ class ImageProcessor:
         print("Detecting edges...")
         return cv2.Canny(self.image,200,500)
 
-    def detect_color(self) -> np.ndarray:
+    def detect_color(self, hue) -> np.ndarray:
         """
         Detect the color of an image
         :param img: An array with rgb image data
@@ -122,8 +123,10 @@ class ImageProcessor:
         """
         print("Detecting color...")
         # Define the color ranges
-        min_hue = 120
-        max_hue = 150
+        r = 10
+        
+        min_hue = hue - r
+        max_hue = hue + r
         min_sat = 50
         max_sat = 255
         min_val = 50
@@ -159,7 +162,7 @@ class ImageProcessor:
 
     def get_distance(self, img: np.ndarray) -> float:
         y = max(np.where(img == 255)[0])
-        distance = 8.2 / np.tan(y * np.arctan(8.2/16) / self.horizon)
+        distance = 8.2 / np.tan(y * np.arctan(8.2/17.5) / self.horizon)
         print("Calculated distance:", distance)
         return distance
 
